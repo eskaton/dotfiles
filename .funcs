@@ -1,0 +1,238 @@
+function hexenc() {
+   xxd -g0 $1 | cut -d' ' -f2 | tr -d '\012'
+}
+
+function hexdec() {
+   sed -n 's/.\{32\}/&\n/gp' $1 | nl -i 16 -s ':' -v 0 | awk -F':' '{printf("%08x: %s\n",$1,$2)}' | xxd -r -g0 -c16
+}
+
+function b64enc() {
+   if [[ -n $1 ]]; then
+      echo $1 |\
+   python -c "
+import sys
+import base64
+print base64.b64encode(sys.stdin.read().rstrip('\n'))"
+   else
+   python -c "
+import sys
+import base64
+print base64.b64encode(sys.stdin.read().rstrip('\n'))"
+   fi
+}
+
+function b64dec() {
+   if [[ -n $1 ]]; then
+      echo $1 |\
+   python -c "
+import sys
+import base64
+print base64.b64decode(sys.stdin.read())"
+   else
+   python -c "
+import sys
+import base64
+print base64.b64decode(sys.stdin.read())"
+   fi
+}
+
+function hexcalc() {
+   if [[ -n $1 ]]; then
+      v=$1;
+   else 
+      read v
+   fi
+   (echo "obase=16;ibase=16"; echo $v | tr "[a-z]" "[A-Z]") | bc
+}
+
+function hex2dec() {
+   if [[ -n $1 ]]; then
+      v=$1;
+   else 
+      read v
+   fi
+   (echo "ibase=16;"; echo $v | tr "[a-z]" "[A-Z]") | bc
+}
+
+function dec2hex() {
+   if [[ -n $1 ]]; then
+      v=$1;
+   else 
+      read v
+   fi
+   (echo "obase=16;"; echo $v) | bc
+}
+
+function dec2bin() {
+   if [[ -n $1 ]]; then
+      v=$1;
+   else 
+      read v
+   fi
+   (echo "obase=2;"; echo $v) | bc
+}
+
+function oct2dec() {
+   if [[ -n $1 ]]; then
+      v=$1;
+   else 
+      read v
+   fi
+   (echo "ibase=8;"; echo $v | tr "[a-z]" "[A-Z]") | bc
+}
+
+function dec2oct() {
+   if [[ -n $1 ]]; then
+      v=$1;
+   else 
+      read v
+   fi
+   (echo "obase=8;"; echo $v) | bc
+}
+
+function hex2bin() {
+   if [[ -n $1 ]]; then
+      v=$1;
+   else 
+      read v
+   fi
+   (echo "ibase=16;obase=2;"; echo $v | tr "[a-z]" "[A-Z]") | bc
+}
+
+function bin2hex() {
+   if [[ -n $1 ]]; then
+      v=$1;
+   else 
+      read v
+   fi
+   (echo "obase=16;ibase=2;"; echo $v) | bc
+}
+
+function bin2dec() {
+   if [[ -n $1 ]]; then
+      v=$1;
+   else 
+      read v
+   fi
+   (echo "obase=10;ibase=2;"; echo $v) | bc
+}
+
+function asc2hex() {
+   if [[ -n $1 ]]; then
+      v=$1;
+   else 
+      read v
+   fi
+   echo -n $v | od -tx1 | sed 's/^[0-9]*//' | tr -d "\012" | sed 's/ *//g'
+}
+
+function hex2asc() {
+   if [[ -n $1 ]]; then
+      v=$1;
+   else 
+      read v
+   fi
+   echo -n "0: $v" | xxd -r
+}
+
+function rotl() {
+   if [[ -n $1 ]]; then
+      v=$1;
+   else 
+      read v
+   fi
+   echo $v | sed 's/^\(.\)\(.*\)$/\2\1/'
+}
+
+function rotr() {
+   if [[ -n $1 ]]; then
+      v=$1;
+   else 
+      read v
+   fi
+   echo $v | sed 's/^\(.*\)\(.\)$/\2\1/'
+}
+
+# displays characters that use 8 bits
+function 8bitchrs() {
+  if [[ $# -ne 1 ]]; then
+     echo "Usage: 8bitchrs <file>"
+     return
+  fi
+  cat $1 | tr -d '\001-\177' | od -cx
+}
+
+function gdb_thread() {
+  if [[ $# -ne 2 ]]; then
+     echo "Usage: gdb_thread <pid> <thread-id>"
+     return
+  fi
+
+  script=/tmp/$$.$RANDOM.gdb
+  cat <<_END_ > $script
+set pagination off
+info thread $2
+thread $2
+bt
+detach
+quit
+_END_
+
+  gdb -pid $1 -batch -x $script
+  rm -f $script
+}
+
+function gdb_threads() {
+  if [[ $# -ne 1 ]]; then
+     echo "Usage: gdb_threads <pid>"
+     return
+  fi
+
+  script=/tmp/$$.$RANDOM.gdb
+  cat <<_END_ > $script
+set pagination off
+info threads
+detach
+quit
+_END_
+
+  gdb -pid $1 -batch -x $script
+  rm -f $script
+}
+
+function java_threads {
+  if [[ $# -ne 1 ]]; then
+     echo "Usage: java_threads <pid>"
+     return
+  fi
+  gdb_threads $1 | grep 'main -'
+}
+
+function f() {
+   find . -name "$1" -print
+}
+
+function time2str() {
+   perl -e 'use POSIX qw(strftime); print strftime("%Y.%m.%d %H:%M:%S\n", localtime($ARGV[0]))' $1
+}
+
+# find a class in a list of .jar files
+function findjar() {
+   if [[ $# -ne 1 ]]; then
+      echo "Usage: findjar <class>"
+      return
+   fi
+
+   for i in *.jar; do 
+      jar -tvf $i | grep $1 >/dev/null 
+      if [ $? -eq 0 ]; then 
+         echo "$i:" 
+         jar -tvf $i | grep $1
+      fi
+   done
+}
+
+function dotfiles() {
+   tar -C ~ -czf dotfiles.tar.gz .vimrc .aliases .aliases_loc .funcs .funcs_loc  .zshrc .xmobarrc .xmonad/xmonad.hs
+}
+

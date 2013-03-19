@@ -1,0 +1,17 @@
+Config { font = "-*-Fixed-Bold-R-Normal-*-13-*-*-*-*-*-*-*"
+       , bgColor = "#141414"
+       , fgColor = "#757575"
+       , position = TopW L 100
+       , commands = [ Run Weather "LSZH" ["-t", " <station>: <tempC>°C", "-L", "10", "-H", "25", "--normal", "green", "--high", "red", "--low", "lightblue"] 36000
+                    , Run Cpu ["-L","3","-H","50","--normal","green","--high","red", "-p", "3"] 10
+                    , Run Memory ["-t","Mem: <usedratio>%"] 10
+                    , Run Swap [] 10
+                    , Run DiskU [("/", "/: <usedp>%"), ("/usr1", "/usr1: <usedp>%")] 
+                                ["-L", "20", "-H", "80", "-m", "1", "-n", "green", "-h", "red", "-l", "lightblue"] 20
+                    , Run Date "%a %b %_d %H:%M:%S" "date" 10
+                    , Run StdinReader
+                    ]
+       , sepChar = "%"
+       , alignSep = "}{"
+       , template = "%StdinReader% }{ %cpu% | %memory% * %swap% | %disku% |%LSZH% | <fc=#ee9a00>%date%</fc>"
+       }
