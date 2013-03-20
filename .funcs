@@ -236,3 +236,60 @@ function dotfiles() {
    tar -C ~ -czf dotfiles.tar.gz .vimrc .aliases .aliases_loc .funcs .funcs_loc  .zshrc .xmobarrc .xmonad/xmonad.hs
 }
 
+function payloads() {
+   if [[ $# -ne 1 ]]; then
+      echo "Usage: payloads <pcap-file>"
+      return
+   fi  
+
+   if [[ -f $1 ]]; then
+      python -c "
+from scapy.all import *; from sys import argv
+for (p,n) in filter(lambda p: not isinstance(p[0][TCP].payload, Padding), (lambda p: zip(p, range(len(p))))(rdpcap(argv[1]))):
+   with open('{}.{}'.format(argv[1], n), 'wb') as f:
+      f.write(p[TCP].payload.__str__())" $1
+   fi  
+}
+
+function swatch() {
+   if [[ $# -eq 1 ]]; then
+      file=$1
+      interval=1
+   elif [[ $# -eq 2 ]]; then
+      file=$1
+      interval=$2
+   else
+      echo "Usage: swatch <file> [ <interval> ]"
+      return
+   fi  
+
+   if [ ! -f "$file" ]; then
+      echo "$file doesn't exist"
+      return
+   fi  
+
+   unset ini_size
+   unset last_size
+   elapsed=0
+
+   while true; do  
+      size=$(ls -l $file 2>/dev/null | cut -d' ' -f5)
+
+      if [ ! -f "$file" ]; then
+         return
+      fi  
+
+      if [[ -z $ini_size ]]; then 
+         ini_size=$size
+      fi  
+
+      if [[ $elapsed -gt 0 ]]; then 
+         echo $size " / " $(bc <<<$size-$old_size) " / " $(bc <<<($size-$ini_size)/$elapsed/$interval)"/s"
+      fi  
+
+      old_size=$size
+      sleep $interval
+      elapsed=$((elapsed + $interval))
+   done
+}
+

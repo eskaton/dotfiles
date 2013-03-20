@@ -48,6 +48,7 @@ main = do
       , ((mod4Mask,               xK_s),   submap $ searchEngineMap $ promptSearchBrowser defaultXPConfig firefox)
       , ((mod4Mask .|. shiftMask, xK_s),   submap $ searchEngineMap $ selectSearchBrowser firefox)
       , ((mod4Mask,               xK_Tab), toggleWS)
+      , ((mod4Mask,               xK_b),   sendMessage ToggleStruts)
       ]
 
 myWorkspaces = ["1", "2", "3", "4", "5", "6:dev", "7:eclipse", "8:mail", "9:web"]

@@ -20,6 +20,7 @@ nnoremap <leader>m :call ToggleMouse()<cr>
 vnoremap <leader>m :call ToggleMouse()<cr>
 nnoremap <leader>n :call ToggleNumber()<cr>
 nnoremap <leader>s :source %<cr>
+nnoremap <leader>f :call ShowFuncName()<cr>
  
 colo molokai
 hi CursorLine   cterm=NONE ctermbg=black ctermfg=white guibg=darkred guifg=white
@@ -28,12 +29,15 @@ set directory=~/tmp "for swap files
 map gr :grep <cword> %:p:h/*<CR>
 command! PrettyXML silent %!xmllint --encode UTF-8 --format -
 
+au BufNewFile,BufRead *.pc set filetype=c
 au BufNewFile,BufRead *.jad set filetype=java
 au BufNewFile,BufRead .env set filetype=zsh
 au BufNewFile,BufRead .aliases set filetype=zsh
 au BufNewFile,BufRead .aliases_loc set filetype=zsh
 au BufNewFile,BufRead .funcs set filetype=zsh
 au BufNewFile,BufRead .funcs_loc set filetype=zsh
+
+au Filetype html,xml source ~/.vim/scripts/xhtmlcomments.vim
 
 function! ToggleMouse()
    if &mouse == ""
@@ -53,3 +57,12 @@ function! ToggleNumber()
       set norelativenumber
    endif
 endfunction
+
+function! ShowFuncName()
+  let lnum = line(".")
+  let col = col(".")
+  echohl ModeMsg
+  echo getline(search("^[^ \t#/]\\{2}.*[^:]\s*$", 'bW'))
+  echohl None
+  :call cursor(lnum, col)
+endfun

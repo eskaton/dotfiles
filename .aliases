@@ -27,8 +27,9 @@ alias aiff2mp3='find . -name "*.aiff" -exec basename {} ".aiff" \; | tr "\012" "
 if [ $(uname) = "FreeBSD" ]; then
    alias ls='ls -G'
    alias vless='TERM=xterm-256color /usr/local/share/vim/vim73/macros/less.sh'
-else # Linux
+elif [ $(uname) = "Linux" ]; then
+   alias ls='ls --color'
    alias vless='TERM=xterm-256color /usr/share/vim/vim73/macros/less.sh'
    alias watchf='iwatch -e all_events '
-alias execnr='setarch i386 -RL '
+   alias execnr='setarch i386 -RL '
 fi

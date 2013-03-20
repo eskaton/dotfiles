@@ -16,6 +16,10 @@ setopt NONOMATCH
 setopt HIST_IGNORE_SPACE
 
 autoload -U colors && colors
+autoload edit-command-line
+zle -N edit-command-line
+
+bindkey -M vicmd v edit-command-line
 
 uid=$(id | cut -d= -f2 | cut -d\( -f1)
 
