@@ -12,8 +12,9 @@ compinit
 # End of lines added by compinstall
 
 setopt EXTENDED_GLOB
-setopt NONOMATCH
 setopt HIST_IGNORE_SPACE
+setopt NONOMATCH
+setopt PROMPT_SUBST
 
 autoload -U colors && colors
 autoload edit-command-line
@@ -29,7 +30,16 @@ else
    pscolor=green
 fi
 
-export PS1="%{%B%F{$pscolor}%}%n@%m:%.>%{%b%f%}%  "
+function gb() {
+   git status -sb 2>/dev/null | sed -n '1s/^## \([^.]*\).*$/\1/p'
+}
+
+function gb_prompt {
+   branch=$(gb)
+   test -n "$branch" && echo "%{%F{yellow}%} ($branch)"
+}
+
+export PS1='%{%B%F{$pscolor}%}%n@%m:%.$(gb_prompt)%{%F{$pscolor}%}>%{%b%f%}%  '
 export LSCOLORS=Exfxcxdxbxegedabagacad
 export LESS_TERMCAP_mb=$(tput bold; tput setaf 7) # white
 export LESS_TERMCAP_md=$(tput bold; tput setaf 1) # red
