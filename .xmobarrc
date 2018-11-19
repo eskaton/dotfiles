@@ -9,9 +9,9 @@ Config { font = "-*-Fixed-Bold-R-Normal-*-13-*-*-*-*-*-*-*"
                     , Run DiskU [("/", "/: <usedp>%"), ("/usr1", "/usr1: <usedp>%")] 
                                 ["-L", "20", "-H", "80", "-m", "1", "-n", "green", "-h", "red", "-l", "lightblue"] 20
                     , Run Date "%a %b %_d %H:%M:%S" "date" 10
-                    , Run StdinReader
+                    , Run UnsafeStdinReader
                     ]
        , sepChar = "%"
        , alignSep = "}{"
-       , template = "%StdinReader% }{ %cpu% | %memory% * %swap% | %disku% |%LSZH% | <fc=#ee9a00>%date%</fc>"
+       , template = "%UnsafeStdinReader% }{ %cpu% | %memory% * %swap% | %disku% |%LSZH% | <fc=#ee9a00>%date%</fc>"
        }

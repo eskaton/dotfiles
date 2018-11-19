@@ -24,6 +24,7 @@ firefox = "/usr/local/bin/firefox"
 chrome = "/usr/local/bin/chrome"
 thunderbird = "/usr/local/bin/thunderbird"
 gvim = "/usr/local/bin/gvim"
+dmenuRun = "dmenu_run -nb '#141414' -nf '#757575' -fn '-*-Fixed-*-R-Normal-*-13-*-*-*-*-*-*-*'"
 
 switch_ws ws = case filter (\(_,w) -> w == ws) $ zip (map show [0..]) myWorkspaces of
                   [(n,_)] -> wrap ("<action=xdotool set_desktop " ++ n ++ ">") "</action>" ws
@@ -33,7 +34,7 @@ main = do
    xmonad $ ewmh def
       { modMask = mod4Mask
       , manageHook = manageDocks <+> myManageHook
-      , layoutHook = avoidStruts $ layoutHook def ||| Grid ||| ResizableTall 1 (3/100) (1/2) []
+      , layoutHook = myLayout
       , handleEventHook = handleEventHook def <+> docksEventHook
       , logHook = dynamicLogWithPP xmobarPP
             { ppOutput = hPutStrLn xmproc
@@ -47,7 +48,8 @@ main = do
       , focusedBorderColor = "#193375" 
       , workspaces         = myWorkspaces
       } `additionalKeys` [ 
-        ((mod4Mask .|. shiftMask, xK_p),   submap programsMap)
+        ((mod4Mask,               xK_p),   spawn dmenuRun)
+      , ((mod4Mask .|. shiftMask, xK_p),   submap programsMap)
       , ((mod4Mask .|. shiftMask, xK_o),   promptSelection firefox)
       , ((mod4Mask,               xK_a),   sendMessage MirrorShrink)
       , ((mod4Mask,               xK_z),   sendMessage MirrorExpand)
@@ -91,9 +93,11 @@ programsMap = M.fromList $
       ]
 
 dictCc = searchEngine "dictcc" "http://dict.cc/?s="
+duckDuckGo = searchEngine "duckduckgo" "http://duckduckgo.com/?q="
 
 searchEngineMap method = M.fromList $
-      [ ((0, xK_d), method dictCc)
+      [ ((0, xK_e), method dictCc)
+      , ((0, xK_d), method duckDuckGo)
       , ((0, xK_g), method google)
       , ((0, xK_i), method imdb)
       , ((0, xK_h), method hoogle)
