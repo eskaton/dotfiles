@@ -31,7 +31,7 @@ else
 fi
 
 function gb() {
-   git status -sb 2>/dev/null | sed -rn '1s/^## (.*)((\.\.\..*)|$)/\1/p'
+   git status -sb 2>/dev/null | sed '1s/\.\.\..*$//' | sed -n '1s/^## //p'
 }
 
 function gb_prompt {
