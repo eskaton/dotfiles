@@ -31,7 +31,7 @@ switch_ws ws = case filter (\(_,w) -> w == ws) $ zip (map show [0..]) myWorkspac
 
 main = do
    xmproc <- spawnPipe "/usr/bin/xmobar ~/.xmobarrc"
-   xmonad $ ewmh def
+   xmonad $ ewmh def {focusFollowsMouse = False}
       { modMask = mod4Mask
       , manageHook = manageDocks <+> myManageHook
       , layoutHook = myLayout
