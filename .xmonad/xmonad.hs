@@ -1,7 +1,7 @@
 import qualified Data.Map as M
 import XMonad
 import XMonad.Actions.CycleWS
-import XMonad.Actions.Search
+import XMonad.Actions.Search hiding (hoogle)
 import XMonad.Actions.Submap
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
@@ -94,6 +94,7 @@ programsMap = M.fromList $
 
 dictCc = searchEngine "dictcc" "http://dict.cc/?s="
 duckDuckGo = searchEngine "duckduckgo" "http://duckduckgo.com/?q="
+hoogle = searchEngine "hoogle" "https://hoogle.haskell.org/?hoogle="
 
 searchEngineMap method = M.fromList $
       [ ((0, xK_e), method dictCc)
