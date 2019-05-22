@@ -213,7 +213,7 @@ function f() {
 }
 
 function time2str() {
-   perl -e 'use POSIX qw(strftime); print strftime("%Y.%m.%d %H:%M:%S\n", localtime($ARGV[0]))' $1
+   perl -e 'use POSIX qw(strftime); print strftime("%Y.%m.%d %H:%M:%S\n", localtime($ARGV[0]))' $(echo $1 | cut -c 1-10)
 }
 
 # find a class in a list of .jar files
