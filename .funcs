@@ -6,6 +6,18 @@ function hexdec() {
    sed -n 's/.\{32\}/&\n/gp' $1 | nl -i 16 -s ':' -v 0 | awk -F':' '{printf("%08x: %s\n",$1,$2)}' | xxd -r -g0 -c16
 }
 
+function md5() {
+   script="
+import sys
+import md5
+sys.stdout.write(md5.md5(sys.stdin.read().rstrip('\n')).digest())"
+   if [[ -n $1 ]]; then
+      echo $1 | python -c $script
+   else
+      python -c $script
+   fi
+}
+
 function b64enc() {
    if [[ -n $1 ]]; then
       echo $1 |\
