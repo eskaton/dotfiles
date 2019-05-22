@@ -144,7 +144,7 @@ function hex2asc() {
    else 
       read v
    fi
-   echo -n "0: $v" | xxd -r
+   echo -n $v | sed -n 's/.\{32\}/&\n/gp' | nl -i 16 -s ':' -v 0 | awk -F':' '{printf("%08x: %s\n",$1,$2)}' | xxd -c 16 -r
 }
 
 function rotl() {
