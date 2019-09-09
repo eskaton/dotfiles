@@ -98,16 +98,15 @@ programsMap home = M.fromList $
       ]
 
 dictCc = searchEngine "dictcc" "http://dict.cc/?s="
-hoogleSearch = searchEngine "hoogle" "https://hoogle.haskell.org/?hoogle="
-duckDuckGo = searchEngine "duckduckgo" "http://duckduckgo.com/?q="
 hoogle = searchEngine "hoogle" "https://hoogle.haskell.org/?hoogle="
+duckDuckGo = searchEngine "duckduckgo" "http://duckduckgo.com/?q="
 
 searchEngineMap method = M.fromList $
       [ ((0, xK_e), method dictCc)
       , ((0, xK_d), method duckDuckGo)
       , ((0, xK_g), method google)
       , ((0, xK_i), method imdb)
-      , ((0, xK_h), method hoogleSearch)
+      , ((0, xK_h), method hoogle)
       , ((0, xK_w), method wikipedia)
       ]
 
