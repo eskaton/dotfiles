@@ -3,34 +3,39 @@ import XMonad
 import XMonad.Actions.CycleWS
 import XMonad.Actions.Search
 import XMonad.Actions.Submap
-import XMonad.Hooks.DynamicLog
+import XMonad.Actions.WindowGo
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.SetWMName
-import XMonad.Layout.Fullscreen
+import XMonad.Prompt.Man
 import XMonad.Layout.Grid
-import XMonad.Layout.NoBorders
-import XMonad.Layout.PerWorkspace
 import XMonad.Layout.ResizableTile
+import XMonad.Layout.Fullscreen
+import XMonad.Layout.NoBorders
 import XMonad.Layout.Tabbed
 import XMonad.Layout.ThreeColumns
-import XMonad.Prompt.Man
+import XMonad.Layout.PerWorkspace
 import XMonad.Util.Run(spawnPipe)
 import XMonad.Util.EZConfig
 import XMonad.Util.XSelection
+import System.Directory(getHomeDirectory)
 import System.IO
 
-firefox = "/usr/local/bin/firefox"
-chrome = "/usr/local/bin/chrome"
-thunderbird = "/usr/local/bin/thunderbird"
-gvim = "/usr/local/bin/gvim"
-dmenuRun = "dmenu_run -nb '#141414' -nf '#757575' -fn '-*-Fixed-*-R-Normal-*-13-*-*-*-*-*-*-*'"
+lbin = "/usr/local/bin"
+
+firefox = lbin ++ "/firefox"
+chrome = lbin ++ "/chrome"
+thunderbird = lbin ++ "/thunderbird"
+gvim = lbin ++ "/gvim"
+intellij home = home ++ "/apps/idea-IU-173.3942.27/bin/idea.sh"
 
 switch_ws ws = case filter (\(_,w) -> w == ws) $ zip (map show [0..]) myWorkspaces of
                   [(n,_)] -> wrap ("<action=xdotool set_desktop " ++ n ++ ">") "</action>" ws
 
 main = do
-   xmproc <- spawnPipe "/usr/bin/xmobar ~/.xmobarrc"
+   home <- getHomeDirectory
+   xmproc <- spawnPipe $ lbin ++ "/xmobar-freebsd -i " ++ home ++ "/.xmobar.d/icons ~/.xmobarrc"
    xmonad $ ewmh def
       { modMask = mod4Mask
       , manageHook = manageDocks <+> myManageHook
@@ -48,8 +53,7 @@ main = do
       , focusedBorderColor = "#193375" 
       , workspaces         = myWorkspaces
       } `additionalKeys` [ 
-        ((mod4Mask,               xK_p),   spawn dmenuRun)
-      , ((mod4Mask .|. shiftMask, xK_p),   submap programsMap)
+        ((mod4Mask .|. shiftMask, xK_p),   submap $ programsMap home)
       , ((mod4Mask .|. shiftMask, xK_o),   promptSelection firefox)
       , ((mod4Mask,               xK_a),   sendMessage MirrorShrink)
       , ((mod4Mask,               xK_z),   sendMessage MirrorExpand)
@@ -63,8 +67,8 @@ main = do
 ideLayout = fullscreenLayout ||| (avoidStruts $ Tall 1 (3/100) (1/2))
 fullscreenLayout = (noBorders (fullscreenFull Full)) ||| (avoidStruts $ Full)
 
-myLayout = onWorkspace "7:ide" ideLayout $
-    onWorkspace "9:web" fullscreenLayout $
+myLayout = onWorkspace "7:ide" ideLayout $ 
+    onWorkspace "9:web" fullscreenLayout $ 
     avoidStruts (
       Tall 1 (3/100) (1/2) |||
       Mirror (Tall 1 (3/100) (1/2)) |||
@@ -83,16 +87,18 @@ tabConfig = def {
     fontName = "-*-Fixed-Bold-R-Normal-*-15-*-*-*-*-*-*-*222"
 }
 
-myWorkspaces = ["1", "2", "3", "4", "5", "6:dev", "7:eclipse", "8:mail", "9:web"]
+myWorkspaces = ["1", "2", "3", "4", "5", "6:dev", "7:ide", "8:mail", "9:web"]
 
-programsMap = M.fromList $
+programsMap home = M.fromList $
       [ ((0, xK_c), spawn chrome)
       , ((0, xK_f), spawn firefox)
       , ((0, xK_t), spawn thunderbird)
       , ((0, xK_v), spawn gvim)
+      , ((0, xK_i), spawn $ intellij home)
       ]
 
 dictCc = searchEngine "dictcc" "http://dict.cc/?s="
+hoogleSearch = searchEngine "hoogle" "https://hoogle.haskell.org/?hoogle="
 duckDuckGo = searchEngine "duckduckgo" "http://duckduckgo.com/?q="
 
 searchEngineMap method = M.fromList $
@@ -100,14 +106,13 @@ searchEngineMap method = M.fromList $
       , ((0, xK_d), method duckDuckGo)
       , ((0, xK_g), method google)
       , ((0, xK_i), method imdb)
-      , ((0, xK_h), method hoogle)
+      , ((0, xK_h), method hoogleSearch)
       , ((0, xK_w), method wikipedia)
       ]
 
 myManageHook :: ManageHook
 myManageHook = composeAll [ 
-      className =? "Eclipse"                    --> doShift "7:ide"
-    , className =? "jetbrains-idea"             --> doShift "7:ide"
+      className =? "jetbrains-idea"             --> doShift "7:ide"
     , className =? "Thunderbird"                --> doShift "8:mail"
     , className =? "Firefox"                    --> doShift "9:web"
     , className =? "Opera"                      --> doShift "9:web"

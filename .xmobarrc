@@ -1,17 +1,28 @@
-Config { font = "-*-Fixed-Bold-R-Normal-*-13-*-*-*-*-*-*-*"
+Config { font = "-*-Fixed-Bold-R-Normal-*-13-*-*-*-*-*-*-*222"
        , bgColor = "#141414"
        , fgColor = "#757575"
        , position = TopW L 100
-       , commands = [ Run Weather "LSZH" ["-t", " <station>: <tempC>°C", "-L", "10", "-H", "25", "--normal", "green", "--high", "red", "--low", "lightblue"] 36000
-                    , Run Cpu ["-L","3","-H","50","--normal","green","--high","red", "-p", "3"] 10
-                    , Run Memory ["-t","Mem: <usedratio>%"] 10
-                    , Run Swap [] 10
-                    , Run DiskU [("/", "/: <usedp>%"), ("/usr1", "/usr1: <usedp>%")] 
+       , commands = [ Run WeatherX "LSZH" [ ("clear", "<icon=sunny.xpm/>")
+                                          , ("sunny", "<icon=sunny.xpm/>")
+                                          , ("mostly clear", "<icon=sunny.xpm/>")
+                                          , ("mostly sunny", "<icon=sunny.xpm/>")
+                                          , ("partly sunny", "<icon=cloudy.xpm/>")
+                                          , ("fair", "<icon=sunny.xpm/>")
+                                          , ("cloudy", "<icon=cloudy.xpm/>")
+                                          , ("overcast", "<icon=cloudy.xpm/>")
+                                          , ("partly cloudy", "<icon=partly-cloudy.xpm/>")
+                                          , ("mostly cloudy", "<icon=cloudy.xpm/>")
+                                          , ("considerable cloudiness", "<icon=cloudy.xpm/>")]
+                                          ["-t", " <station>: <tempC>°C <windKmh> km/h <skyConditionS>", "-L", "10", "-H", "25", "--normal", "green", "--high", "red", "--low", "lightblue"] 36000
+                    , Run Cpu ["-t", "<icon=cpu.xpm/> <total>%", "-L", "3", "-H", "50", "--normal", "green", "--high", "red", "-p", "3"] 10
+                    , Run Memory ["-t", "<icon=memory.xpm/> <usedratio>%"] 10
+                    , Run Swap ["-t", "<usedratio>%"] 10
+                    , Run DiskU [("/usr/home", "/usr/home: <usedp>%")] 
                                 ["-L", "20", "-H", "80", "-m", "1", "-n", "green", "-h", "red", "-l", "lightblue"] 20
                     , Run Date "%a %b %_d %H:%M:%S" "date" 10
                     , Run UnsafeStdinReader
                     ]
        , sepChar = "%"
        , alignSep = "}{"
-       , template = "%UnsafeStdinReader% }{ %cpu% | %memory% * %swap% | %disku% |%LSZH% | <fc=#ee9a00>%date%</fc>"
+       , template = "%UnsafeStdinReader% }{ %cpu% | %memory% * %swap% | <icon=disk.xpm/> %disku% |%LSZH% | <fc=#ee9a00>%date%</fc>"
        }

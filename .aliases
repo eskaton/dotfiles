@@ -25,11 +25,15 @@ alias der2pem='openssl x509 -inform DER -outform PEM -in '
 alias aiff2mp3='find . -name "*.aiff" -exec basename {} ".aiff" \; | tr "\012" "\000" | xargs -0 -I{} -0 ffmpeg -i {}.aiff -f mp3 -acodec libmp3lame -ab 192000 -ar 44100 {}.mp3'
 
 if [ $(uname) = "FreeBSD" ]; then
+   vimdir=$(ls -1dr /usr/local/share/vim/vim[0-9]* | head -1)
+
    alias ls='ls -G'
-   alias vless='TERM=xterm-256color /usr/local/share/vim/vim73/macros/less.sh'
 elif [ $(uname) = "Linux" ]; then
+   vimdir=$(ls -1dr /usr/share/vim/vim[0-9]* | head -1)
+
    alias ls='ls --color'
-   alias vless='TERM=xterm-256color /usr/share/vim/vim73/macros/less.sh'
    alias watchf='iwatch -e all_events '
    alias execnr='setarch i386 -RL '
 fi
+
+alias vless='TERM=xterm-256color '$vimdir'/macros/less.sh'
