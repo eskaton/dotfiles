@@ -6,6 +6,18 @@ function hexdec() {
    sed -n 's/.\{32\}/&\n/gp' $1 | nl -i 16 -s ':' -v 0 | awk -F':' '{printf("%08x: %s\n",$1,$2)}' | xxd -r -g0 -c16
 }
 
+function md5() {
+   script="
+import sys
+import md5
+sys.stdout.write(md5.md5(sys.stdin.read().rstrip('\n')).digest())"
+   if [[ -n $1 ]]; then
+      echo $1 | python -c $script
+   else
+      python -c $script
+   fi
+}
+
 function b64enc() {
    if [[ -n $1 ]]; then
       echo $1 |\
@@ -132,7 +144,7 @@ function hex2asc() {
    else 
       read v
    fi
-   echo -n "0: $v" | xxd -r
+   echo -n $v | sed -n 's/.\{32\}/&\n/gp' | nl -i 16 -s ':' -v 0 | awk -F':' '{printf("%08x: %s\n",$1,$2)}' | xxd -c 16 -r
 }
 
 function rotl() {
@@ -213,7 +225,7 @@ function f() {
 }
 
 function time2str() {
-   perl -e 'use POSIX qw(strftime); print strftime("%Y.%m.%d %H:%M:%S\n", localtime($ARGV[0]))' $1
+   perl -e 'use POSIX qw(strftime); print strftime("%Y.%m.%d %H:%M:%S\n", localtime($ARGV[0]))' $(echo $1 | cut -c 1-10)
 }
 
 # find a class in a list of .jar files

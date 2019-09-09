@@ -1,3 +1,5 @@
+XTerm*VT100.translations: #override <Btn1Up>: select-end(PRIMARY, CLIPBOARD, CUT_BUFFER0)
+XTerm*saveLines: 5000
 XTerm*renderFont: true
 XTerm*faceName: SourceCodePro
 XTerm*faceSize: 14

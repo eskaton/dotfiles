@@ -31,12 +31,20 @@ else
 fi
 
 function gb() {
-   git status -sb 2>/dev/null | sed '1s/\.\.\..*$//' | sed -n '1s/^## //p'
+   branch=$(git status -sb 2>/dev/null | sed '1s/\.\.\..*$//' | sed -n '1s/^## //p')
+
+   if [[ $branch =~ 'no branch' ]]; then
+      commit=$(git status | head -1 | sed -n 's/^.*detached at //p')
+      echo "[detatched @ $commit]"
+      return
+   elif [[ -n $branch ]]; then
+      echo "($branch)"
+   fi
 }
 
 function gb_prompt {
    branch=$(gb)
-   test -n "$branch" && echo "%{%F{yellow}%} ($branch)"
+   test -n "$branch" && echo "%{%F{yellow}%} $branch"
 }
 
 export PS1='%{%B%F{$pscolor}%}%n@%m:%.$(gb_prompt)%{%F{$pscolor}%}>%{%b%f%}%  '
@@ -71,4 +79,3 @@ if [ -f ~/.funcs_loc ]; then
    # source functions specific to this machine
    . ~/.funcs_loc
 fi
-

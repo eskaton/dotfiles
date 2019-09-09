@@ -1,7 +1,7 @@
 import qualified Data.Map as M
 import XMonad
 import XMonad.Actions.CycleWS
-import XMonad.Actions.Search
+import XMonad.Actions.Search hiding (hoogle)
 import XMonad.Actions.Submap
 import XMonad.Actions.WindowGo
 import XMonad.Hooks.EwmhDesktops
@@ -36,7 +36,7 @@ switch_ws ws = case filter (\(_,w) -> w == ws) $ zip (map show [0..]) myWorkspac
 main = do
    home <- getHomeDirectory
    xmproc <- spawnPipe $ lbin ++ "/xmobar-freebsd -i " ++ home ++ "/.xmobar.d/icons ~/.xmobarrc"
-   xmonad $ ewmh def
+   xmonad $ ewmh def {focusFollowsMouse = False}
       { modMask = mod4Mask
       , manageHook = manageDocks <+> myManageHook
       , layoutHook = myLayout
@@ -100,6 +100,7 @@ programsMap home = M.fromList $
 dictCc = searchEngine "dictcc" "http://dict.cc/?s="
 hoogleSearch = searchEngine "hoogle" "https://hoogle.haskell.org/?hoogle="
 duckDuckGo = searchEngine "duckduckgo" "http://duckduckgo.com/?q="
+hoogle = searchEngine "hoogle" "https://hoogle.haskell.org/?hoogle="
 
 searchEngineMap method = M.fromList $
       [ ((0, xK_e), method dictCc)
