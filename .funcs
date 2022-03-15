@@ -144,7 +144,18 @@ function hex2asc() {
    else 
       read v
    fi
-   echo -n $v | sed -n 's/.\{32\}/&\n/gp' | nl -i 16 -s ':' -v 0 | awk -F':' '{printf("%08x: %s\n",$1,$2)}' | xxd -c 16 -r
+
+   echo -n $v | sed 's/.\{32\}/&\n/g' | nl -i 16 -s ':' -v 0 | awk -F':' '{printf("%08x: %s\n",$1,$2)}' | xxd -c 16 -r
+}
+
+function declist2asc() {
+   if [[ -n $1 ]]; then
+      v=$1;
+   else 
+      read v
+   fi
+
+   echo -n $v | tr , '\n' | while read x; do echo $x | dec2hex; done  | tr -d '\n' | hex2asc
 }
 
 function rotl() {
@@ -244,8 +255,18 @@ function findjar() {
    done
 }
 
+function jarmaj() {
+   if [[ $# -ne 1 ]]; then
+      echo "Usage: jarmaj <jar-file>"
+      return
+   fi
+
+   jar -tvf $1 | grep '\.class' | head -1 | awk '{print $NF}' | xargs unzip -q -c $1 | \
+      tail -c +7 | head -c 2 | asc2hex | hex2dec
+}
+
 function dotfiles() {
-   tar -C ~ -czf dotfiles.tar.gz .vimrc .aliases .aliases_loc .funcs .funcs_loc  .zshrc .xmobarrc .xmonad/xmonad.hs
+   tar -C ~ -czf dotfiles.tar.gz .vimrc .aliases .aliases_loc .funcs .funcs_loc .zshrc .xmobarrc .xmonad/xmonad.hs
 }
 
 function payloads() {
@@ -261,6 +282,23 @@ for (p,n) in filter(lambda p: not isinstance(p[0][TCP].payload, Padding), (lambd
    with open('{}.{}'.format(argv[1], n), 'wb') as f:
       f.write(p[TCP].payload.__str__())" $1
    fi  
+}
+
+function pynslookup() {
+   if [[ $# -ne 1 ]]; then
+      echo "Usage: pynslookup <hostname>"
+      return
+   fi
+
+   python -c "
+import dns.resolver
+import sys
+try:
+   answers = dns.resolver.query('$1', 'A')
+   sys.stdout.write((answers.rrset.items[0].address if not answers is None else '') + '\n')
+except Exception as e:
+   pass
+"
 }
 
 function swatch() {
@@ -305,3 +343,67 @@ function swatch() {
    done
 }
 
+function reorder_cols() {
+   # Reorders columns in a delimited file. Expects a comma-separated list of fields 
+   # for the current (from) and for the new (to) ordering. The actual field names
+   # have no meaning, but for ease of use a CSV header may be used.
+
+   local from
+   local to
+   local delim=","
+
+   while getopts ":f:t:d:" opt; do
+      case $opt in
+         f)
+            from="$OPTARG"
+            ;;
+         t)
+            to="$OPTARG"
+            ;;
+         d)
+            delim="$OPTARG"
+            ;;
+         \?)
+            echo "Usage: $0 -f <from> -t <to> [-d <delimiter>]" >&2
+            return
+      esac
+   done
+
+   if [[ -z "$from" || -z "$to" ]]; then
+      echo "Usage: $0 -f <from> -t <to> [-d <delimiter>]" >&2
+      return
+   fi
+
+   awk -v from="$from" -v to="$to" -F "$delim" ' 
+   BEGIN { 
+      split(from, from_a, ",")
+      split(to, to_a, ",")
+
+      for (f in from_a) {
+         from_d[from_a[f]] = f
+      }
+
+      for (i = 1; i <= length(to_a); i++) {
+         pos[i] = from_d[to_a[i]]
+      }
+   }
+
+   {
+      line = ""
+
+      for (i = 1; i <= length(pos); i++) {
+         if (i == 1) {
+            printf("%s", $pos[i]) 
+         } else {
+            printf("%s%s", FS, $pos[i]) 
+         }
+      }
+
+      printf("\n")
+   }'
+}
+
+# Substitute password placeholders %[<password-id>]% in a file with the respective password
+function sub_pass {
+	sed "/^.*%\[\(.*\)\]%.*$/{h; s//pass \1/e; x; G; s/^\(.*\)%\[\(.*\)\]%\(.*\)\n\(.*\)$/\1\4\3/ }" <$1
+}
